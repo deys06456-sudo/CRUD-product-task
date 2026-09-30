@@ -11,11 +11,23 @@ class ProductController {
                 });
             }
 
+            // Image required
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Product image is required"
+                });
+            }
+
             //Create Product Object
             const productdata = new Product({
                 name,
                 description,
                 price,
+
+                // Multer image
+                image: req.file.filename,
+
                 category,
                 inStock
             });
@@ -86,29 +98,49 @@ class ProductController {
     async updateProduct(req, res) {
         try {
             const id = req.params.id;
+
             const { name, description, price, category, inStock } = req.body;
+
+            // Create update object
+            const updateData = {
+                name,
+                description,
+                price,
+                category,
+                inStock
+            };
+
+            // New image uploaded
+            if (req.file) {
+                updateData.image = req.file.filename;
+            }
+
             const updateProduct = await Product.findByIdAndUpdate(
                 id,
-                { name, description, price, category, inStock },
-                { new: true }
+                updateData,
+                {
+                    new: true,
+                    runValidators: true
+                }
             );
 
             if (!updateProduct) {
                 return res.status(404).json({
                     success: false,
-                    message: "Product not found",
+                    message: "Product not found"
                 });
             }
+
             return res.status(200).json({
                 success: true,
-                message: "Data updated successfully",
-                data: updateProduct,
+                message: "Product updated successfully",
+                data: updateProduct
             });
 
         } catch (error) {
             return res.status(500).json({
                 success: false,
-                message: error.message,
+                message: error.message
             });
         }
     }
@@ -119,7 +151,7 @@ class ProductController {
             const id = req.params.id;
             const deleteProduct = await Product.findByIdAndDelete(id);
             if (!deleteProduct) {
-                return res.status(400).json ({
+                return res.status(400).json({
                     success: false,
                     message: "Product not Found"
                 });

@@ -1,11 +1,13 @@
 const express = require('express');
 const ProductController = require ('../controller/product.controller');
+const upload = require('../utils/multer');
 const router = express.Router();
 const productController = new ProductController();
 
 //Create Product 
-router.post (
+router.post(
     "/product/create",
+    upload.single("image"),
     productController.CreateProduct
 );
 
@@ -24,6 +26,7 @@ router.get(
 //Update Product
 router.put(
     "/product/update/:id",
+    upload.single("image"),
     productController.updateProduct
 );
 
